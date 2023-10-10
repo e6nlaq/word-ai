@@ -1,21 +1,29 @@
 from janome.tokenizer import Tokenizer
 import json
 from random import randint
+from os.path import isfile
 
 t = Tokenizer()
+path = "./demo.json"
 
 print("================================")
-print("ようこそ!AIもどきへ!")
-print("\n`!end` で学習を終了するよ!")
+print("学習モード")
+print("\n`!end` で学習を終了")
 print("================================")
 
-with open("./data.json", encoding="utf-8") as f:
+if not isfile(path):
+    with open(path, encoding="utf-8", mode="w") as f:
+        f.write("{}")
+
+with open(path, encoding="utf-8") as f:
     dat: dict[str, list[str]] = json.load(f)
 
 while True:
     inp: str = input(">>> ")
     if inp != "!end":
-        a = list(t.tokenize(inp, wakati=True))
+        a = list(map(str, t.tokenize(inp, wakati=True)))
+        dat.setdefault("!BEGIN", [])
+        dat["!BEGIN"].append(a[0])
         for i in range(len(a)):
             dat.setdefault(a[i], [])
             if i != len(a) - 1:
@@ -23,27 +31,40 @@ while True:
             else:
                 dat[a[i]].append("!end")
 
-        with open("./data.json", mode="w", encoding="utf-8") as f:
+        with open(path, mode="w", encoding="utf-8") as f:
             f.write(json.dumps(dat, indent=4, ensure_ascii=False))
     else:
         break
 
-print("================================")
-print("試してみよう!")
+print("\n\n================================")
+print("生成モード\n")
+print("単語を入力するとその単語から生成")
+print("空白で自動生成")
 print("================================")
 
 while True:
-    inp: str = input(">>> ")
+    make: str = input(">>> ")
+
+    flag = False
+    if make == "":
+        make = "!BEGIN"
+        flag = True
+
     ans: str = ""
-    now: str = inp
-    if inp != "!end":
-        if not inp in dat:
-            print("んなもんねえよ!出直せ!")
+    now: str = make
+
+    if make != "!end":
+        if not make in dat:
+            print("そんな単語ないよ!")
         else:
             while now != "!end":
                 ans += now
                 now = dat[now][randint(0, len(dat[now]) - 1)]
-            print(ans)
+
+            if flag:
+                print(ans[6:])
+            else:
+                print(ans)
     else:
-        print("See you!")
+        print("じゃあね!")
         break

@@ -4,7 +4,7 @@ from random import randint
 from os.path import isfile
 
 t = Tokenizer()
-path = "./demo.json"
+path = "./data.json"
 
 print("================================")
 print("学習モード")
@@ -20,6 +20,11 @@ with open(path, encoding="utf-8") as f:
 
 while True:
     inp: str = input(">>> ")
+
+    if inp == "":
+        print("なんか入れてよ...")
+        continue
+
     if inp != "!end":
         a = list(map(str, t.tokenize(inp, wakati=True)))
         dat.setdefault("!BEGIN", [])
